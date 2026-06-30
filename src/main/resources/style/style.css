@@ -1,0 +1,66 @@
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---- Installer tab: dark, stone-textured background, white text ---- */
+
+.installer-tab {
+    -fx-background-color: #1c1c1c;
+    -fx-background-image: url("../images/stone.png");
+    -fx-background-repeat: repeat;
+}
+
+.app-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.field-label {
+    -fx-text-fill: #d8d8d8;
+    -fx-font-size: 12px;
+}
+
+.field-value {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+}
+
+.status-label {
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+}
+
+.install-button {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+/* ---- Options tab: light background, default control styling ---- */
+
+.options-tab {
+    -fx-background-color: -fx-control-inner-background;
+}
+
+.section-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+.hint-label {
+    -fx-text-fill: #777777;
+    -fx-font-style: italic;
+}
+
+/* ---- Footer bar ---- */
+
+.footer-bar {
+    -fx-background-color: derive(-fx-control-inner-background, -5%);
+    -fx-border-color: #cccccc transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.footer-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #555555;
+}

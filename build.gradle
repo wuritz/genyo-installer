@@ -1,9 +1,10 @@
 plugins {
-    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group = 'dev.genyo.installer'
-version = '1.0-SNAPSHOT'
+version = '1.0'
 
 repositories {
     mavenCentral()
@@ -13,6 +14,31 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(26)
+    }
+}
+
+
+application {
+    mainClass = 'dev.genyo.installer.Main'
+}
+
+javafx {
+    version = '21.0.2'
+    modules = ['javafx.controls', 'javafx.graphics']
+}
+
+
+tasks.named('jar') {
+    manifest {
+        attributes(
+                'Main-Class': 'dev.genyo.installer.Main'
+        )
+    }
 }
 
 test {
