@@ -17,14 +17,25 @@ import java.util.Map;
 
 public class GitHubReleaseClient {
 
-    private static final String RELEASES_API_URL = "https://api.github.com/repos/wuritz/genyo-addon/releases";
-    private final HttpClient httpClient;
+    private static final String RELEASES_API_URL =
+            "https://api.github.com/repos/wuritz/genyo-addon/releases/latest";
+
+    private final HttpClient apiClient;
+    private final HttpClient downloadClient;
+
     private final String userAgent;
 
     public GitHubReleaseClient(String installerVersion) {
         this.userAgent = "GenyoInstaller/" + installerVersion;
-        this.httpClient = HttpClient.newBuilder()
+
+        this.apiClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(15))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build();
+
+        this.downloadClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(15))
+                .followRedirects(HttpClient.Redirect.NORMAL)
                 .build();
     }
 
@@ -36,19 +47,8 @@ public class GitHubReleaseClient {
 
     public String fetchLatestVersionTag() {
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(RELEASES_API_URL))
-                    .header("User-Agent", userAgent)
-                    .timeout(Duration.ofSeconds(15))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
-                return "Offline";
-            }
-
-            Map<String, Object> root = JsonParser.parseObject(response.body());
+            String body = getApiResponseBody();
+            Map<String, Object> root = JsonParser.parseObject(body);
             Object tagName = root.get("tag_name");
             return tagName != null ? tagName.toString() : "Unknown";
         } catch (Exception e) {
@@ -59,35 +59,28 @@ public class GitHubReleaseClient {
     @SuppressWarnings("unchecked")
     public ReleaseInfo fetchLatestRelease() throws DownloadException {
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(RELEASES_API_URL))
-                    .header("User-Agent", userAgent)
-                    .timeout(Duration.ofSeconds(15))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() / 100 != 2) {
-                throw new DownloadException("GitHub API returned HTTP " + response.statusCode());
+            String body = getApiResponseBody();
+            Map<String, Object> root;
+            try {
+                root = JsonParser.parseObject(body);
+            } catch (JsonParser.JsonParseException e) {
+                String snippet = body.length() > 120 ? body.substring(0, 120) + "..." : body;
+                throw new DownloadException(
+                        "GitHub returned an unexpected response (not a JSON object).\n\nResponse started with:\n" + snippet);
             }
 
-            Map<String, Object> root = JsonParser.parseObject(response.body());
             String tagName = String.valueOf(root.get("tag_name"));
 
             Object assetsObj = root.get("assets");
             if (!(assetsObj instanceof List<?> assets)) {
-                throw new DownloadException("No JAR file found in the latest GitHub release.");
+                throw new DownloadException("No assets list found in the GitHub release response.");
             }
 
             for (Object assetObj : assets) {
-                if (!(assetObj instanceof Map<?, ?> assetRaw)) {
-                    continue;
-                }
+                if (!(assetObj instanceof Map<?, ?> assetRaw)) continue;
                 Map<String, Object> asset = (Map<String, Object>) assetRaw;
                 Object nameObj = asset.get("name");
-                if (nameObj == null) {
-                    continue;
-                }
+                if (nameObj == null) continue;
                 String name = nameObj.toString();
                 if (name.toLowerCase().endsWith(".jar")) {
                     String downloadUrl = String.valueOf(asset.get("browser_download_url"));
@@ -96,16 +89,16 @@ public class GitHubReleaseClient {
             }
 
             throw new DownloadException("No JAR file found in the latest GitHub release.");
+
+        } catch (DownloadException e) {
+            throw e;
         } catch (IOException | InterruptedException e) {
             throw new DownloadException("Network error while contacting GitHub: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new DownloadException("Unexpected error contacting GitHub: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Downloads a release's jar to a temp file, reporting progress along the way.
-     *
-     * @return the path to the downloaded temp file
-     */
     public Path downloadJarToTemp(ReleaseInfo release, ProgressListener progress) throws DownloadException {
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -115,17 +108,17 @@ public class GitHubReleaseClient {
                     .GET()
                     .build();
 
-            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            HttpResponse<InputStream> response =
+                    downloadClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
             if (response.statusCode() / 100 != 2) {
                 throw new DownloadException("Download failed with HTTP " + response.statusCode());
             }
 
             long totalBytes = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
 
-            Path tempPath = Files.createTempFile("genyo-addon-", "-" + release.jarFileName());
             Path tempDir = Files.createTempDirectory("genyo-installer-");
             Path finalTempPath = tempDir.resolve(release.jarFileName());
-            Files.deleteIfExists(tempPath);
 
             try (InputStream in = response.body();
                  OutputStream out = Files.newOutputStream(finalTempPath)) {
@@ -143,18 +136,32 @@ public class GitHubReleaseClient {
             }
 
             return finalTempPath;
+        } catch (DownloadException e) {
+            throw e;
         } catch (IOException | InterruptedException e) {
             throw new DownloadException("Network error while downloading: " + e.getMessage(), e);
         }
     }
 
-    public static class DownloadException extends Exception {
-        public DownloadException(String message) {
-            super(message);
-        }
+    private String getApiResponseBody() throws IOException, InterruptedException, DownloadException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(RELEASES_API_URL))
+                .header("User-Agent", userAgent)
+                .header("Accept", "application/vnd.github+json")
+                //.header("X-GitHub-Api-Version", "2022-11-28")
+                .timeout(Duration.ofSeconds(15))
+                .GET()
+                .build();
 
-        public DownloadException(String message, Throwable cause) {
-            super(message, cause);
+        HttpResponse<String> response = apiClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() / 100 != 2) {
+            throw new DownloadException("GitHub API returned HTTP " + response.statusCode());
         }
+        return response.body();
+    }
+
+    public static class DownloadException extends Exception {
+        public DownloadException(String message) { super(message); }
+        public DownloadException(String message, Throwable cause) { super(message, cause); }
     }
 }
