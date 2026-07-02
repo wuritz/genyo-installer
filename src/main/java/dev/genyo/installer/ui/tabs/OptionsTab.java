@@ -1,4 +1,4 @@
-package dev.genyo.installer.ui.tabs;
+package dev.genyo.installer.ui;
 
 import dev.genyo.installer.InstallerOptions;
 import dev.genyo.installer.LauncherType;
@@ -18,47 +18,64 @@ import javafx.stage.Stage;
 
 import java.util.Optional;
 
+/**
+ * Java port of {@code UC_Options.cs} / {@code UC_Options.Designer.cs}: the
+ * "Options" tab with install-location and installation-process settings.
+ */
 public class OptionsTab {
 
     private final Stage ownerStage;
     private final InstallerOptions options;
     private final Runnable onOptionsChanged;
 
-    private final VBox root = new VBox(18);
+    private final VBox root = new VBox(20);
 
     public OptionsTab(Stage ownerStage, InstallerOptions options, Runnable onOptionsChanged) {
-        this.ownerStage = ownerStage;
-        this.options = options;
+        this.ownerStage       = ownerStage;
+        this.options          = options;
         this.onOptionsChanged = onOptionsChanged;
 
         root.getStyleClass().add("options-tab");
-        root.setPadding(new Insets(18));
 
-        root.getChildren().addAll(buildInstallLocationSection(), buildInstallationProcessSection(), buildFooter());
+        root.getChildren().addAll(
+                buildSection("INSTALL LOCATION",   buildInstallLocationContent()),
+                buildSection("INSTALLATION PROCESS", buildInstallationProcessContent()),
+                buildFooter());
     }
 
-    public Region getView() {
-        return root;
+    public Region getView() { return root; }
+
+    // ---------------------------------------------------------------
+    // Layout helpers
+    // ---------------------------------------------------------------
+
+    /** Wraps content in a section with a header label + card-style box. */
+    private Region buildSection(String title, Region content) {
+        Label header = new Label(title);
+        header.getStyleClass().add("section-header");
+
+        VBox card = new VBox(content);
+        card.getStyleClass().add("option-group");
+
+        return new VBox(4, header, card);
     }
 
-    private Region buildInstallLocationSection() {
-        Label sectionLabel = new Label("Install location");
-        sectionLabel.getStyleClass().add("section-label");
-
+    private Region buildInstallLocationContent() {
         CheckBox cbOnlyLauncher = new CheckBox("Only install into this launcher:");
         cbOnlyLauncher.setSelected(options.explicitLauncher);
         Tooltip.install(cbOnlyLauncher, new Tooltip(
-                "The installer only looks for the selected launcher's directories."));
+                "The installer only searches the selected launcher's directories."));
 
         ComboBox<String> launcherCombo = new ComboBox<>();
         launcherCombo.getItems().addAll("Minecraft Launcher", "Prism Launcher");
         launcherCombo.getSelectionModel().select(
                 options.selectedExplicitLauncher == LauncherType.PRISM ? 1 : 0);
         launcherCombo.disableProperty().bind(cbOnlyLauncher.selectedProperty().not());
+        launcherCombo.setPrefWidth(170);
 
         CheckBox cbSelectManually = new CheckBox("Manually select the install folder");
         Tooltip.install(cbSelectManually, new Tooltip(
-                "Instead of the installer looking for folders, you decide where explicitly to install Genyo."));
+                "You choose the exact folder to install into, skipping automatic detection."));
 
         cbOnlyLauncher.selectedProperty().addListener((obs, was, isNow) -> {
             options.explicitLauncher = isNow;
@@ -74,8 +91,7 @@ public class OptionsTab {
         cbSelectManually.selectedProperty().addListener((obs, was, isNow) -> {
             if (isNow) {
                 boolean proceed = confirm(
-                        "Note that enabling this completely skips any checks that ensure only valid install "
-                                + "locations are used.\n\nDo you wish to proceed?");
+                        "Enabling this skips all checks that validate the install location.\n\nDo you want to proceed?");
                 if (!proceed) {
                     cbSelectManually.setSelected(false);
                     return;
@@ -84,59 +100,58 @@ public class OptionsTab {
             options.manualInstallLocation = isNow;
         });
 
-        HBox launcherRow = new HBox(8, cbOnlyLauncher, launcherCombo);
-        launcherRow.setAlignment(Pos.CENTER_LEFT);
-
-        // Apply initial state to InstallerOptions so the default (Prism Launcher,
-        // "only this launcher" checked) matches what's shown, mirroring the
-        // original UC_Options_Load.
         applyLauncherSelection(launcherCombo);
 
-        return new VBox(10, sectionLabel, launcherRow, cbSelectManually);
+        HBox launcherRow = new HBox(10, cbOnlyLauncher, launcherCombo);
+        launcherRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox box = new VBox(12, launcherRow, cbSelectManually);
+        return box;
     }
 
-    private Region buildInstallationProcessSection() {
-        Label sectionLabel = new Label("Installation process");
-        sectionLabel.getStyleClass().add("section-label");
-
+    private Region buildInstallationProcessContent() {
         CheckBox cbIgnore = new CheckBox("Ignore checks for Fabric and Meteor");
         cbIgnore.setSelected(options.ignoreFabricMeteor);
         Tooltip.install(cbIgnore, new Tooltip(
-                "The installer blocks the download if it can't find Fabric or Meteor in your 'mods' folder. "
-                        + "This ignores that check."));
-
+                "Normally the installer requires Fabric and Meteor to already be in your mods folder. "
+                        + "This skips that check."));
         cbIgnore.selectedProperty().addListener((obs, was, isNow) -> options.ignoreFabricMeteor = isNow);
 
-        return new VBox(10, sectionLabel, cbIgnore);
+        return new VBox(cbIgnore);
     }
 
     private Region buildFooter() {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        Label hint = new Label("Hover on an option for more details.");
+        Label hint = new Label("Hover over an option for details.");
         hint.getStyleClass().add("hint-label");
-        HBox hintRow = new HBox(hint);
-        hintRow.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox box = new VBox(spacer, hintRow);
-        VBox.setVgrow(box, Priority.ALWAYS);
-        return box;
+        HBox hintRow = new HBox(hint);
+        hintRow.setAlignment(Pos.BOTTOM_RIGHT);
+
+        VBox footer = new VBox(spacer, hintRow);
+        VBox.setVgrow(footer, Priority.ALWAYS);
+        return footer;
     }
 
+    // ---------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------
+
     private void applyLauncherSelection(ComboBox<String> combo) {
-        int index = combo.getSelectionModel().getSelectedIndex();
         options.selectedExplicitLauncher =
-                index == 0 ? LauncherType.MINECRAFT : LauncherType.PRISM;
+                combo.getSelectionModel().getSelectedIndex() == 0
+                        ? LauncherType.MINECRAFT
+                        : LauncherType.PRISM;
     }
 
     private boolean confirm(String message) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.YES, ButtonType.NO);
-        alert.setTitle("Confirmation needed");
+        alert.setTitle("Confirmation");
         alert.setHeaderText(null);
         alert.initOwner(ownerStage);
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.YES;
     }
-
 }

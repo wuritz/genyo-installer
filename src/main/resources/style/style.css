@@ -1,66 +1,301 @@
+/* ================================================================
+   Genyo Installer — dark theme stylesheet
+   ================================================================ */
+
+/* ---- Global base ---- */
 .root {
-    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-family: "Segoe UI", system-ui, "Helvetica Neue", sans-serif;
+    -fx-base:                   #1e1e1e;
+    -fx-background:             #111111;
+    -fx-control-inner-background: #1e1e1e;
+    -fx-accent:                 #4da6ff;
+    -fx-dark-text-color:        #f0f0f0;
+    -fx-mid-text-color:         #aaaaaa;
+    -fx-light-text-color:       #555555;
 }
 
-/* ---- Installer tab: dark, stone-textured background, white text ---- */
-
-.installer-tab {
-    -fx-background-color: #1c1c1c;
-    -fx-background-image: url("../images/stone.png");
-    -fx-background-repeat: repeat;
+/* ================================================================
+   TAB PANE
+   ================================================================ */
+.tab-pane {
+    -fx-tab-min-height: 36px;
+    -fx-padding: 0;
 }
 
-.app-title {
-    -fx-font-size: 30px;
+.tab-pane > .tab-header-area {
+    -fx-background-color: #161616;
+    -fx-padding: 0;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: #161616;
+    -fx-border-color: transparent transparent #2a2a2a transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-padding: 8px 22px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab .tab-label {
+    -fx-text-fill: #565656;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: normal;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #4da6ff transparent;
+    -fx-border-width: 0 0 2.5 0;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .tab-label {
+    -fx-text-fill: #efefef;
     -fx-font-weight: bold;
-    -fx-text-fill: white;
 }
 
-.field-label {
-    -fx-text-fill: #d8d8d8;
-    -fx-font-size: 12px;
+.tab-pane > .tab-header-area > .headers-region > .tab:hover .tab-label {
+    -fx-text-fill: #aaaaaa;
 }
 
-.field-value {
-    -fx-text-fill: white;
-    -fx-font-size: 18px;
+.tab-pane > .tab-content-area {
+    -fx-background-color: #111111;
+    -fx-padding: 0;
 }
 
+/* ================================================================
+   INSTALLER TAB
+   ================================================================ */
+.installer-tab {
+    -fx-background-image: url("stone.png");
+    -fx-background-repeat: repeat;
+    -fx-background-color: #0e0e0e;
+    -fx-padding: 20px 22px 18px 22px;
+}
+
+/* Header */
+.app-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f0f0f0;
+}
+
+/* Version info */
+.version-label {
+    -fx-text-fill: #555555;
+    -fx-font-size: 11px;
+}
+
+.version-value {
+    -fx-text-fill: #e8e8e8;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+/* Status */
 .status-label {
-    -fx-text-fill: white;
-    -fx-font-size: 12px;
+    -fx-font-size: 11.5px;
+    -fx-text-fill: #555555;
+}
+.status-ok {
+    -fx-text-fill: #57d97d;
+}
+.status-update {
+    -fx-text-fill: #f0c040;
 }
 
+/* Primary install button — the signature element */
 .install-button {
+    -fx-background-color: linear-gradient(to bottom, #4da6ff, #2a84e0);
+    -fx-background-radius: 8px;
+    -fx-text-fill: white;
     -fx-font-size: 15px;
     -fx-font-weight: bold;
+    -fx-padding: 13px 34px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(77, 166, 255, 0.5), 16, 0.35, 0, 3);
+}
+.install-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #5eb3ff, #3891f0);
+    -fx-effect: dropshadow(gaussian, rgba(77, 166, 255, 0.70), 22, 0.45, 0, 5);
+}
+.install-button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #2a84e0, #1869b8);
+    -fx-effect: dropshadow(gaussian, rgba(77, 166, 255, 0.30), 8, 0.2, 0, 1);
 }
 
-/* ---- Options tab: light background, default control styling ---- */
+/* Outlined ghost link buttons (GitHub / Website / Discord) */
+.link-button {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: #383838;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-text-fill: #b0b0b0;
+    -fx-font-size: 12px;
+    -fx-padding: 6px 14px;
+    -fx-cursor: hand;
+}
+.link-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.11);
+    -fx-border-color: #565656;
+    -fx-text-fill: #eeeeee;
+}
+.link-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+}
 
+/* Inline text-style changelog link */
+.changelog-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #4da6ff;
+    -fx-font-size: 12px;
+    -fx-padding: 2px 0;
+    -fx-cursor: hand;
+    -fx-underline: false;
+}
+.changelog-button:hover {
+    -fx-text-fill: #7cbeff;
+    -fx-underline: true;
+}
+
+/* ================================================================
+   OPTIONS TAB
+   ================================================================ */
 .options-tab {
-    -fx-background-color: -fx-control-inner-background;
+    -fx-background-color: #111111;
+    -fx-padding: 20px 24px;
 }
 
-.section-label {
+.section-header {
+    -fx-text-fill: #484848;
+    -fx-font-size: 10.5px;
     -fx-font-weight: bold;
-    -fx-font-size: 13px;
+    -fx-padding: 0 0 8px 2px;
 }
 
+/* Card-style option group */
+.option-group {
+    -fx-background-color: rgba(255, 255, 255, 0.035);
+    -fx-background-radius: 7px;
+    -fx-border-color: #282828;
+    -fx-border-radius: 7px;
+    -fx-padding: 14px 16px;
+}
+
+/* Dark check-box */
+.check-box {
+    -fx-text-fill: #c8c8c8;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+.check-box .box {
+    -fx-background-color: #1e1e1e, #303030;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 3;
+}
+.check-box:hover .box {
+    -fx-background-color: #282828, #404040;
+    -fx-background-insets: 0, 1;
+}
+.check-box:selected .box {
+    -fx-background-color: #1a60bf, #4da6ff;
+    -fx-background-insets: 0, 1;
+}
+.check-box:selected .mark {
+    -fx-background-color: white;
+}
+.check-box .text {
+    -fx-fill: #c8c8c8;
+}
+.check-box:disabled .text {
+    -fx-fill: #484848;
+}
+
+/* Dark combo-box */
+.combo-box {
+    -fx-background-color: #1e1e1e, #303030;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+.combo-box:hover {
+    -fx-background-color: #252525, #3a3a3a;
+    -fx-background-insets: 0, 1;
+}
+.combo-box:disabled {
+    -fx-opacity: 0.4;
+}
+.combo-box .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c8c8c8;
+    -fx-font-size: 12.5px;
+    -fx-padding: 3px 6px;
+}
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 8px;
+}
+.combo-box .arrow {
+    -fx-background-color: #666666;
+}
+/* Popup list */
+.combo-box-popup .list-view {
+    -fx-background-color: #222222;
+    -fx-border-color: #363636;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 14, 0.2, 0, 5);
+}
+.combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c8c8c8;
+    -fx-font-size: 12.5px;
+    -fx-padding: 6px 10px;
+    -fx-background-radius: 4;
+}
+.combo-box-popup .list-cell:filled:hover {
+    -fx-background-color: #2a7ae0;
+    -fx-text-fill: white;
+}
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #1a5fb4;
+    -fx-text-fill: white;
+}
+
+/* Hint */
 .hint-label {
-    -fx-text-fill: #777777;
+    -fx-text-fill: #3a3a3a;
+    -fx-font-size: 11px;
     -fx-font-style: italic;
 }
 
-/* ---- Footer bar ---- */
-
+/* ================================================================
+   FOOTER
+   ================================================================ */
 .footer-bar {
-    -fx-background-color: derive(-fx-control-inner-background, -5%);
-    -fx-border-color: #cccccc transparent transparent transparent;
+    -fx-background-color: #0c0c0c;
+    -fx-border-color: #222222 transparent transparent transparent;
     -fx-border-width: 1 0 0 0;
+    -fx-padding: 6px 14px;
 }
 
 .footer-label {
     -fx-font-size: 11px;
-    -fx-text-fill: #555555;
+    -fx-text-fill: #383838;
+}
+
+/* ================================================================
+   SEPARATOR
+   ================================================================ */
+.separator .line {
+    -fx-border-color: #2a2a2a transparent transparent transparent;
+    -fx-border-insets: 1 0 0 0;
+    -fx-border-width: 1 0 0 0;
 }
