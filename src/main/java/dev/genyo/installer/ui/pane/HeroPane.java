@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class HeroPane {
 
@@ -123,7 +122,7 @@ public class HeroPane {
     }
 
     private Region buildLinksRow() {
-        Button github  = textLink("GitHub",  "https://github.com/wuritz/genyo-addon");
+        Button github  = textLink("GitHub",  "https://genyo.dev/github");
         Button website = textLink("Website", "https://genyo.dev");
         Button discord = textLink("Discord", "https://genyo.dev/discord");
 
