@@ -1,9 +1,8 @@
-package dev.genyo.installer.api;
+package dev.genyo.installer.util;
 
-import dev.genyo.installer.api.options.InstallerOptions;
-import dev.genyo.installer.api.options.LauncherType;
+import dev.genyo.installer.util.options.InstallerOptions;
 import dev.genyo.installer.net.GitHubReleaseClient;
-import dev.genyo.installer.path.PathSearcher;
+import dev.genyo.installer.util.path.PathSearcher;
 import dev.genyo.installer.ui.dialog.LauncherSelectorDialog;
 import dev.genyo.installer.ui.dialog.PrismInstanceSelectorDialog;
 import dev.genyo.installer.ui.dialog.ProgressDialog;

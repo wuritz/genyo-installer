@@ -1,4 +1,4 @@
-package dev.genyo.installer.json;
+package dev.genyo.installer.util.json;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

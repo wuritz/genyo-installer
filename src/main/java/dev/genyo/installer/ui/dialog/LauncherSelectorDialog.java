@@ -1,5 +1,6 @@
 package dev.genyo.installer.ui.dialog;
 
+import dev.genyo.installer.util.ResourceReference;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -37,7 +38,7 @@ public class LauncherSelectorDialog {
         root.getStyleClass().add("launcher-selector-root");
 
         Scene scene = new Scene(root, 400, 200);
-        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style/style.css")).toExternalForm());
+        scene.getStylesheets().add(ResourceReference.STYLE_RES);
         stage.setScene(scene);
     }
 

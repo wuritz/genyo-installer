@@ -1,6 +1,7 @@
-package dev.genyo.installer.ui.tabs;
+package dev.genyo.installer.ui.pane;
 
-import dev.genyo.installer.api.options.InstallerOptions;
+import dev.genyo.installer.util.options.InstallerOptions;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -15,58 +16,76 @@ import javafx.stage.Stage;
 
 import java.util.Optional;
 
-public class OptionsTab {
+public class SettingsPane {
+
+    private static final double WIDTH = 300;
 
     private final Stage ownerStage;
     private final InstallerOptions options;
 
-    private final VBox root = new VBox(20);
+    private final VBox root = new VBox(22);
 
-    public OptionsTab(Stage ownerStage, InstallerOptions options) {
+    public SettingsPane(Stage ownerStage, InstallerOptions options) {
         this.ownerStage       = ownerStage;
         this.options          = options;
 
-        root.getStyleClass().add("options-tab");
+        root.getStyleClass().add("settings-pane");
+        root.setPadding(new Insets(30, 26, 24, 24));
+        root.setPrefWidth(WIDTH);
+        root.setMinWidth(WIDTH);
+        root.setMaxWidth(WIDTH);
 
         root.getChildren().addAll(
-                buildSection("Install location",   buildInstallLocationContent()),
-                buildSection("Installation process", buildInstallationProcessContent()),
+                buildHeader(),
+                buildSection("INSTALL LOCATION", buildInstallLocationContent()),
+                buildSection("INSTALLATION PROCESS", buildInstallationProcessContent()),
                 buildFooter());
     }
 
     public Region getView() { return root; }
 
     // ---------------------------------------------------------------
-    // Layout helpers
+    // Layout
     // ---------------------------------------------------------------
 
-    /** Wraps content in a section with a header label + card-style box. */
+    private Region buildHeader() {
+        Label gear = new Label("⚙");
+        gear.getStyleClass().add("settings-gear");
+        Label title = new Label("Settings");
+        title.getStyleClass().add("settings-title");
+
+        HBox row = new HBox(8, gear, title);
+        row.setAlignment(Pos.CENTER_LEFT);
+        VBox.setMargin(row, new Insets(0, 0, 6, 0));
+        return row;
+    }
+
     private Region buildSection(String title, Region content) {
         Label header = new Label(title);
         header.getStyleClass().add("section-header");
-
         VBox card = new VBox(content);
         card.getStyleClass().add("option-group");
-
-        return new VBox(4, header, card);
+        return new VBox(8, header, card);
     }
 
     private Region buildInstallLocationContent() {
-        CheckBox cbManualVersion =  new CheckBox("Manually select the version to be installed.");
-        cbManualVersion.setSelected(options.manualVersionSelect);
+        // Version selector
+
+        CheckBox cbManualVersion = new CheckBox("Manually select the version");
+        cbManualVersion.setWrapText(true);
         Tooltip.install(cbManualVersion, new Tooltip(
-                "Allows you to select what version you want to install, instead of the latest one"
-        ));
-
-        CheckBox cbManualInstallLocation = new CheckBox("Manually select the install folder");
-        Tooltip.install(cbManualInstallLocation, new Tooltip(
-                "You choose the exact folder to install into, skipping automatic detection."));
-
-        // Listener add
+                "Allows you to select what version of Genyo to install."));
 
         cbManualVersion.selectedProperty().addListener((obs, was, isNow) -> {
-           options.manualVersionSelect = isNow;
+            options.manualVersionSelect = isNow;
         });
+
+        // Install location selector
+
+        CheckBox cbManualInstallLocation = new CheckBox("Manually select the install folder");
+        cbManualInstallLocation.setWrapText(true);
+        Tooltip.install(cbManualInstallLocation, new Tooltip(
+                "You choose the exact folder to install into, skipping automatic detection."));
 
         cbManualInstallLocation.selectedProperty().addListener((obs, was, isNow) -> {
             if (isNow) {
@@ -80,18 +99,19 @@ public class OptionsTab {
             options.manualInstallLocation = isNow;
         });
 
-        VBox box = new VBox(12, cbManualVersion, cbManualInstallLocation);
-        return box;
+        // Assemble
+
+        return new VBox(10, cbManualVersion, cbManualInstallLocation);
     }
 
     private Region buildInstallationProcessContent() {
         CheckBox cbIgnore = new CheckBox("Ignore checks for Fabric and Meteor");
+        cbIgnore.setWrapText(true);
         cbIgnore.setSelected(options.ignoreFabricMeteor);
         Tooltip.install(cbIgnore, new Tooltip(
                 "Normally the installer requires Fabric and Meteor to already be in your mods folder. "
                         + "This skips that check."));
         cbIgnore.selectedProperty().addListener((obs, was, isNow) -> options.ignoreFabricMeteor = isNow);
-
         return new VBox(cbIgnore);
     }
 
@@ -101,11 +121,9 @@ public class OptionsTab {
 
         Label hint = new Label("Hover over an option for details.");
         hint.getStyleClass().add("hint-label");
+        hint.setWrapText(true);
 
-        HBox hintRow = new HBox(hint);
-        hintRow.setAlignment(Pos.BOTTOM_RIGHT);
-
-        VBox footer = new VBox(spacer, hintRow);
+        VBox footer = new VBox(spacer, hint);
         VBox.setVgrow(footer, Priority.ALWAYS);
         return footer;
     }

@@ -1,4 +1,4 @@
-package dev.genyo.installer.api.options;
+package dev.genyo.installer.util.options;
 
 public class InstallerOptions {
 

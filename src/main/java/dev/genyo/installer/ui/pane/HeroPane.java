@@ -1,9 +1,10 @@
-package dev.genyo.installer.ui.tabs;
+package dev.genyo.installer.ui.pane;
 
-import dev.genyo.installer.api.options.InstallerOptions;
-import dev.genyo.installer.api.InstallerService;
+import dev.genyo.installer.util.InstallerService;
+import dev.genyo.installer.util.ResourceReference;
+import dev.genyo.installer.util.options.InstallerOptions;
 import dev.genyo.installer.net.GitHubReleaseClient;
-import dev.genyo.installer.path.PathSearcher;
+import dev.genyo.installer.util.path.PathSearcher;
 import javafx.application.HostServices;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -12,10 +13,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -28,7 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class InstallerTab {
+public class HeroPane {
+
+    private static final double WIDTH = 420;
 
     private final Stage ownerStage;
     private final InstallerOptions options;
@@ -37,22 +38,34 @@ public class InstallerTab {
 
     private final Label installedVersionValue = new Label("—");
     private final Label latestVersionValue    = new Label("Fetching...");
-    private final Label statusLabel           = new Label("");
+    private final Label statusBadge           = new Label("");
     private final Button installButton        = new Button("Install Genyo");
 
-    private final BorderPane root = new BorderPane();
+    private final VBox root = new VBox();
 
-    public InstallerTab(Stage ownerStage, InstallerOptions options, HostServices hostServices) {
-        this.ownerStage   = ownerStage;
-        this.options      = options;
-        this.hostServices = hostServices;
+    public HeroPane(Stage ownerStage, InstallerOptions options, HostServices hostServices) {
+        this.ownerStage    = ownerStage;
+        this.options       = options;
+        this.hostServices  = hostServices;
         this.releaseClient = new GitHubReleaseClient(options.installerVersion);
 
-        root.getStyleClass().add("installer-tab");
+        root.getStyleClass().add("hero-pane");
+        root.setPrefWidth(WIDTH);
+        root.setMinWidth(WIDTH);
+        root.setMaxWidth(WIDTH);
+        root.setPadding(new Insets(30, 32, 26, 32));
 
-        root.setTop(buildHeader());
-        root.setCenter(buildVersionInfo());
-        root.setRight(buildRightPanel());
+        installButton.getStyleClass().add("install-button");
+        installButton.setMaxWidth(Double.MAX_VALUE);
+        installButton.setOnAction(e -> onInstallClicked());
+        VBox.setMargin(installButton, new Insets(0, 0, 14, 0));
+
+        root.getChildren().addAll(
+                buildHeader(),
+                buildVersionBlock(),
+                buildSpacer(),
+                installButton,
+                buildLinksRow());
 
         refreshLabels();
     }
@@ -64,94 +77,71 @@ public class InstallerTab {
     // ---------------------------------------------------------------
 
     private Region buildHeader() {
-        ImageView logo = new ImageView(new Image(
-                Objects.requireNonNull(getClass().getResourceAsStream("/images/genyo512.png"))));
-        logo.setFitWidth(64);
-        logo.setFitHeight(64);
+        ImageView logo = new ImageView(new Image(ResourceReference.IMG512_RES));
+        logo.setFitWidth(50);
+        logo.setFitHeight(50);
         logo.setPreserveRatio(true);
 
         Label title = new Label("Genyo Addon");
-        title.getStyleClass().add("app-title");
+        title.getStyleClass().add("hero-title");
 
-        // Link buttons sit on the right of the header row
-        HBox links = buildLinkButtons();
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        HBox header = new HBox(14, logo, title, spacer, links);
+        HBox header = new HBox(14, logo, title);
         header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(0, 0, 0, 0));
-
-        Separator sep = new Separator();
-        sep.setPadding(new Insets(14, 0, 14, 0));
-
-        VBox top = new VBox(header, sep);
-        return top;
+        VBox.setMargin(header, new Insets(0, 0, 30, 0));
+        return header;
     }
 
-    private Region buildVersionInfo() {
+    private Region buildVersionBlock() {
         Label installedLabel = new Label("INSTALLED");
-        installedLabel.getStyleClass().add("version-label");
-        installedVersionValue.getStyleClass().add("version-value");
+        installedLabel.getStyleClass().add("hero-eyebrow");
+        installedVersionValue.getStyleClass().add("hero-value");
 
         Label latestLabel = new Label("LATEST");
-        latestLabel.getStyleClass().add("version-label");
-        latestVersionValue.getStyleClass().add("version-value");
+        latestLabel.getStyleClass().add("hero-eyebrow");
+        latestVersionValue.getStyleClass().add("hero-value");
+        statusBadge.getStyleClass().add("status-badge");
+        statusBadge.setVisible(false);
+        statusBadge.setManaged(false);
+
+        HBox latestRow = new HBox(10, latestVersionValue, statusBadge);
+        latestRow.setAlignment(Pos.CENTER_LEFT);
 
         Button changelogs = new Button("View changelogs →");
         changelogs.getStyleClass().add("changelog-button");
         changelogs.setOnAction(e -> openBrowser("https://genyo.dev/changelogs"));
 
-        Region spacer = new Region();
-        spacer.setPrefHeight(10);
+        Region gap = new Region();
+        gap.setPrefHeight(20);
 
-        VBox box = new VBox(4,
-                installedLabel, installedVersionValue,
-                spacer,
-                latestLabel, latestVersionValue,
-                changelogs);
-        box.setAlignment(Pos.TOP_LEFT);
-        BorderPane.setMargin(box, new Insets(0, 16, 0, 0));
-        return box;
+        return new VBox(4, installedLabel, installedVersionValue, gap, latestLabel, latestRow, changelogs);
     }
 
-    private HBox buildLinkButtons() {
-        Button github  = linkButton("GitHub",  "https://github.com/wuritz/genyo-addon");
-        Button website = linkButton("Website", "https://genyo.dev");
-        Button discord = linkButton("Discord", "https://genyo.dev/discord");
-
-        for (Button b : List.of(github, website, discord)) {
-            b.setPrefWidth(84);
-        }
-
-        HBox box = new HBox(8, github, website, discord);
-        box.setAlignment(Pos.CENTER_RIGHT);
-        return box;
-    }
-
-    private Button linkButton(String text, String url) {
-        Button b = new Button(text);
-        b.getStyleClass().add("link-button");
-        b.setOnAction(e -> openBrowser(url));
-        return b;
-    }
-
-    /** Right panel: status label + install button, bottom-aligned. */
-    private Region buildRightPanel() {
-        statusLabel.getStyleClass().add("status-label");
-
-        installButton.getStyleClass().add("install-button");
-        installButton.setPrefWidth(188);
-        installButton.setOnAction(e -> onInstallClicked());
-
+    private Region buildSpacer() {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
+        return spacer;
+    }
 
-        VBox box = new VBox(8, spacer, statusLabel, installButton);
-        box.setAlignment(Pos.BOTTOM_RIGHT);
-        BorderPane.setMargin(box, new Insets(0, 0, 0, 0));
-        return box;
+    private Region buildLinksRow() {
+        Button github  = textLink("GitHub",  "https://github.com/wuritz/genyo-addon");
+        Button website = textLink("Website", "https://genyo.dev");
+        Button discord = textLink("Discord", "https://genyo.dev/discord");
+
+        Label dot1 = new Label("·");
+        Label dot2 = new Label("·");
+        dot1.getStyleClass().add("hero-link-dot");
+        dot2.getStyleClass().add("hero-link-dot");
+
+        HBox row = new HBox(6, github, dot1, website, dot2, discord);
+        row.setAlignment(Pos.CENTER);
+        return row;
+    }
+
+    private Button textLink(String text, String url) {
+        Button b = new Button(text);
+        b.getStyleClass().add("hero-link-button");
+        b.setOnAction(e -> openBrowser(url));
+        return b;
     }
 
     // ---------------------------------------------------------------
@@ -167,6 +157,7 @@ public class InstallerTab {
             alert.showAndWait();
             return;
         }
+
         InstallerService service = new InstallerService(ownerStage, options, this::refreshLabels);
         service.startInstalling();
     }
@@ -204,9 +195,9 @@ public class InstallerTab {
             latestVersionValue.setText(latest);
 
             if (!offline && installedVersionCounts.containsKey(latest)) {
-                setStatus("✓  Up to date", "status-ok");
+                setStatus("Up to date", "status-badge-ok");
             } else if (!offline && !installedVersionCounts.isEmpty()) {
-                setStatus("↑  Update available", "status-update");
+                setStatus("Update available", "status-badge-update");
             } else {
                 setStatus("", null);
             }
@@ -223,10 +214,13 @@ public class InstallerTab {
     }
 
     private void setStatus(String text, String styleClass) {
-        statusLabel.setText(text);
-        statusLabel.getStyleClass().removeAll("status-ok", "status-update");
+        boolean visible = text != null && !text.isEmpty();
+        statusBadge.setText(text == null ? "" : text);
+        statusBadge.getStyleClass().removeAll("status-badge-ok", "status-badge-update");
+        statusBadge.setVisible(visible);
+        statusBadge.setManaged(visible);
         if (styleClass != null) {
-            statusLabel.getStyleClass().add(styleClass);
+            statusBadge.getStyleClass().add(styleClass);
         }
     }
 

@@ -1,4 +1,4 @@
-package dev.genyo.installer.path;
+package dev.genyo.installer.util.path;
 
 import java.io.File;
 import java.io.IOException;

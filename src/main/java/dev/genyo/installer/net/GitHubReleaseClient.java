@@ -1,6 +1,6 @@
 package dev.genyo.installer.net;
 
-import dev.genyo.installer.json.JsonParser;
+import dev.genyo.installer.util.json.JsonParser;
 
 import java.io.IOException;
 import java.io.InputStream;
