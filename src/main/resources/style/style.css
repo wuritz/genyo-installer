@@ -277,6 +277,35 @@
 }
 
 /* ================================================================
+   LAUNCHER SELECTOR
+   ================================================================ */
+.launcher-selector-root {
+
+}
+
+.launcher-selector-buttons {
+    -fx-fill-width: true;
+    -fx-alignment: center;
+    -fx-text-fill: white;
+}
+
+.launcher-selector-btn {
+    -fx-text-fill: #c6c6c6;
+    -fx-font-size: 13px;
+    -fx-padding: 10px;
+}
+
+.launcher-selector-btn:hover {
+    -fx-background-color: #1e3a5e;
+    -fx-text-fill: white;
+    -fx-cursor: crosshair;
+}
+
+.label-launcher-selector-first {
+    -fx-text-fill: #c6c6c6;
+}
+
+/* ================================================================
    FOOTER
    ================================================================ */
 .footer-bar {

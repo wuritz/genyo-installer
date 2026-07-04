@@ -1,6 +1,6 @@
-package dev.genyo.installer.ui;
+package dev.genyo.installer.ui.tabs;
 
-import dev.genyo.installer.InstallerOptions;
+import dev.genyo.installer.api.options.InstallerOptions;
 import dev.genyo.installer.api.InstallerService;
 import dev.genyo.installer.net.GitHubReleaseClient;
 import dev.genyo.installer.path.PathSearcher;
@@ -26,12 +26,8 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-/**
- * Java port of {@code UC_Installer.cs} / {@code UC_Installer.Designer.cs}:
- * the "Installer" tab showing the Genyo logo, installed/latest version,
- * quick links, and the Install button.
- */
 public class InstallerTab {
 
     private final Stage ownerStage;
@@ -69,7 +65,7 @@ public class InstallerTab {
 
     private Region buildHeader() {
         ImageView logo = new ImageView(new Image(
-                getClass().getResourceAsStream("/images/genyo512.png")));
+                Objects.requireNonNull(getClass().getResourceAsStream("/images/genyo512.png"))));
         logo.setFitWidth(64);
         logo.setFitHeight(64);
         logo.setPreserveRatio(true);

@@ -1,9 +1,10 @@
 package dev.genyo.installer.api;
 
-import dev.genyo.installer.InstallerOptions;
-import dev.genyo.installer.LauncherType;
+import dev.genyo.installer.api.options.InstallerOptions;
+import dev.genyo.installer.api.options.LauncherType;
 import dev.genyo.installer.net.GitHubReleaseClient;
 import dev.genyo.installer.path.PathSearcher;
+import dev.genyo.installer.ui.dialog.LauncherSelectorDialog;
 import dev.genyo.installer.ui.dialog.PrismInstanceSelectorDialog;
 import dev.genyo.installer.ui.dialog.ProgressDialog;
 import javafx.application.Platform;
@@ -36,7 +37,6 @@ public class InstallerService {
         this.client = new GitHubReleaseClient(options.installerVersion);
     }
 
-    /** Entry point, mirrors {@code InstallerScript.StartInstalling}. Call on the FX thread. */
     public void startInstalling() {
         options.installing = true;
 
@@ -48,10 +48,25 @@ public class InstallerService {
         PathSearcher pathSearcher = new PathSearcher();
         String dir;
 
-        if (options.explicitLauncher && options.selectedExplicitLauncher == LauncherType.PRISM) {
-            dir = pathSearcher.searchPrism();
-        } else {
+        // -------------------------
+        // Launcher selection dialog
+        // -------------------------
+
+        boolean mcLauncherSelected;
+        LauncherSelectorDialog dialog = new LauncherSelectorDialog(ownerStage);
+        Optional<Boolean> result = dialog.showAndWaitForSelection();
+
+        if (result.isEmpty()) {
+            closeWithError("Launcher not selected.");
+            return;
+        }
+
+        mcLauncherSelected = result.get();
+
+        if (mcLauncherSelected) {
             dir = pathSearcher.searchMC();
+        } else {
+            dir = pathSearcher.searchPrism();
         }
 
         if (dir.isEmpty()) {

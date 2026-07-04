@@ -1,13 +1,10 @@
-package dev.genyo.installer.ui;
+package dev.genyo.installer.ui.tabs;
 
-import dev.genyo.installer.InstallerOptions;
-import dev.genyo.installer.LauncherType;
-import javafx.geometry.Insets;
+import dev.genyo.installer.api.options.InstallerOptions;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
@@ -18,28 +15,22 @@ import javafx.stage.Stage;
 
 import java.util.Optional;
 
-/**
- * Java port of {@code UC_Options.cs} / {@code UC_Options.Designer.cs}: the
- * "Options" tab with install-location and installation-process settings.
- */
 public class OptionsTab {
 
     private final Stage ownerStage;
     private final InstallerOptions options;
-    private final Runnable onOptionsChanged;
 
     private final VBox root = new VBox(20);
 
-    public OptionsTab(Stage ownerStage, InstallerOptions options, Runnable onOptionsChanged) {
+    public OptionsTab(Stage ownerStage, InstallerOptions options) {
         this.ownerStage       = ownerStage;
         this.options          = options;
-        this.onOptionsChanged = onOptionsChanged;
 
         root.getStyleClass().add("options-tab");
 
         root.getChildren().addAll(
-                buildSection("INSTALL LOCATION",   buildInstallLocationContent()),
-                buildSection("INSTALLATION PROCESS", buildInstallationProcessContent()),
+                buildSection("Install location",   buildInstallLocationContent()),
+                buildSection("Installation process", buildInstallationProcessContent()),
                 buildFooter());
     }
 
@@ -61,51 +52,35 @@ public class OptionsTab {
     }
 
     private Region buildInstallLocationContent() {
-        CheckBox cbOnlyLauncher = new CheckBox("Only install into this launcher:");
-        cbOnlyLauncher.setSelected(options.explicitLauncher);
-        Tooltip.install(cbOnlyLauncher, new Tooltip(
-                "The installer only searches the selected launcher's directories."));
+        CheckBox cbManualVersion =  new CheckBox("Manually select the version to be installed.");
+        cbManualVersion.setSelected(options.manualVersionSelect);
+        Tooltip.install(cbManualVersion, new Tooltip(
+                "Allows you to select what version you want to install, instead of the latest one"
+        ));
 
-        ComboBox<String> launcherCombo = new ComboBox<>();
-        launcherCombo.getItems().addAll("Minecraft Launcher", "Prism Launcher");
-        launcherCombo.getSelectionModel().select(
-                options.selectedExplicitLauncher == LauncherType.PRISM ? 1 : 0);
-        launcherCombo.disableProperty().bind(cbOnlyLauncher.selectedProperty().not());
-        launcherCombo.setPrefWidth(170);
-
-        CheckBox cbSelectManually = new CheckBox("Manually select the install folder");
-        Tooltip.install(cbSelectManually, new Tooltip(
+        CheckBox cbManualInstallLocation = new CheckBox("Manually select the install folder");
+        Tooltip.install(cbManualInstallLocation, new Tooltip(
                 "You choose the exact folder to install into, skipping automatic detection."));
 
-        cbOnlyLauncher.selectedProperty().addListener((obs, was, isNow) -> {
-            options.explicitLauncher = isNow;
-            applyLauncherSelection(launcherCombo);
-            onOptionsChanged.run();
+        // Listener add
+
+        cbManualVersion.selectedProperty().addListener((obs, was, isNow) -> {
+           options.manualVersionSelect = isNow;
         });
 
-        launcherCombo.getSelectionModel().selectedIndexProperty().addListener((obs, was, isNow) -> {
-            applyLauncherSelection(launcherCombo);
-            onOptionsChanged.run();
-        });
-
-        cbSelectManually.selectedProperty().addListener((obs, was, isNow) -> {
+        cbManualInstallLocation.selectedProperty().addListener((obs, was, isNow) -> {
             if (isNow) {
                 boolean proceed = confirm(
                         "Enabling this skips all checks that validate the install location.\n\nDo you want to proceed?");
                 if (!proceed) {
-                    cbSelectManually.setSelected(false);
+                    cbManualInstallLocation.setSelected(false);
                     return;
                 }
             }
             options.manualInstallLocation = isNow;
         });
 
-        applyLauncherSelection(launcherCombo);
-
-        HBox launcherRow = new HBox(10, cbOnlyLauncher, launcherCombo);
-        launcherRow.setAlignment(Pos.CENTER_LEFT);
-
-        VBox box = new VBox(12, launcherRow, cbSelectManually);
+        VBox box = new VBox(12, cbManualVersion, cbManualInstallLocation);
         return box;
     }
 
@@ -138,13 +113,6 @@ public class OptionsTab {
     // ---------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------
-
-    private void applyLauncherSelection(ComboBox<String> combo) {
-        options.selectedExplicitLauncher =
-                combo.getSelectionModel().getSelectedIndex() == 0
-                        ? LauncherType.MINECRAFT
-                        : LauncherType.PRISM;
-    }
 
     private boolean confirm(String message) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.YES, ButtonType.NO);

@@ -1,4 +1,4 @@
-package dev.genyo.installer;
+package dev.genyo.installer.api.options;
 
 public enum LauncherType {
     MINECRAFT,

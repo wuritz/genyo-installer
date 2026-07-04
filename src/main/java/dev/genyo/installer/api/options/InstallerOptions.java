@@ -1,12 +1,9 @@
-package dev.genyo.installer;
+package dev.genyo.installer.api.options;
 
 public class InstallerOptions {
 
     public boolean manualInstallLocation = false;
-    public boolean explicitLauncher = true;
-
-    public LauncherType selectedExplicitLauncher = LauncherType.PRISM;
-
+    public boolean manualVersionSelect = false;
     public boolean ignoreFabricMeteor = false;
 
     public volatile boolean installing = false;
