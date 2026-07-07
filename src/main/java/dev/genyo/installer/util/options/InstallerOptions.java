@@ -3,7 +3,6 @@ package dev.genyo.installer.util.options;
 public class InstallerOptions {
 
     public boolean manualInstallLocation = false;
-    public boolean manualVersionSelect = false;
     public boolean ignoreFabricMeteor = false;
 
     public volatile boolean installing = false;

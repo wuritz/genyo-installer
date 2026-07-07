@@ -69,17 +69,6 @@ public class SettingsPane {
     }
 
     private Region buildInstallLocationContent() {
-        // Version selector
-
-        CheckBox cbManualVersion = new CheckBox("Manually select the version");
-        cbManualVersion.setWrapText(true);
-        Tooltip.install(cbManualVersion, new Tooltip(
-                "Allows you to select what version of Genyo to install."));
-
-        cbManualVersion.selectedProperty().addListener((obs, was, isNow) -> {
-            options.manualVersionSelect = isNow;
-        });
-
         // Install location selector
 
         CheckBox cbManualInstallLocation = new CheckBox("Manually select the install folder");
@@ -101,7 +90,7 @@ public class SettingsPane {
 
         // Assemble
 
-        return new VBox(10, cbManualVersion, cbManualInstallLocation);
+        return new VBox(10, cbManualInstallLocation);
     }
 
     private Region buildInstallationProcessContent() {

@@ -10,7 +10,6 @@
    LEFT — HERO PANE (branding + install action)
    ================================================================ */
 .hero-pane {
-    -fx-background-image: url("images/stone.png");
     -fx-background-repeat: repeat;
     -fx-background-color: #0d0d0d;
 }
