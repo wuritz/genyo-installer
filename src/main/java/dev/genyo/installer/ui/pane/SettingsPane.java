@@ -34,7 +34,6 @@ public class SettingsPane {
         root.setPrefWidth(WIDTH);
         root.setMinWidth(WIDTH);
         root.setMaxWidth(WIDTH);
-
         root.getChildren().addAll(
                 buildHeader(),
                 buildSection("INSTALL LOCATION", buildInstallLocationContent()),
