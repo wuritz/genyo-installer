@@ -1,6 +1,6 @@
 # Welcome to Genyo Installer
 
-The Java *(JavaFX)* port of the [original Genyo Installer](https://github.com/wuritz/GenyoInstaller) that I wrote in C# using Visual Studio.
+The Java *(JavaFX)* port of the [original Genyo Installer](https://github.com/wuritz/GenyoInstaller-old) that I wrote in C# using Visual Studio.
 
 ## Features
 - Automatically detects your Prism Launcher instances, and gives you the option to choose which ones you would like to install Genyo to.
