@@ -11,5 +11,3 @@ The Java *(JavaFX)* port of the [original Genyo Installer](https://github.com/wu
 
 ## Preview
 <img src="assets/genyoinstaller.png" alt="Screenshot">
-
-Just to clarify, as seen on the picture above, the installer and the addon's latest versions matching are pure coincidence :D
