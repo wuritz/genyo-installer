@@ -9,5 +9,12 @@ The Java *(JavaFX)* port of the [original Genyo Installer](https://github.com/wu
 - Ability to install into a manually given folder
 - Keeping track of installed versions... uhhh kinda.
 
+## Usage
+- Double-click the `.jar` file to open.
+- Or open a cmd and run `java -jar genyo-installer-{version}.jar` (replace {version} with the version you installed)
+
+## Prerequisites
+**The installer requires `Java 26`.**
+
 ## Preview
 <img src="assets/genyoinstaller.png" alt="Screenshot">
